@@ -1,10 +1,11 @@
 
 import { useState } from "react";
-import { Calendar, Users, Clock, BellRing, DollarSign, LucideIcon } from "lucide-react";
+import { Calendar, Users, LayoutDashboard, BellRing, DollarSign, LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Link, useLocation } from "react-router-dom";
 
 interface NavItem {
-  icon: LucideIcon;  // Alterado aqui para usar o tipo LucideIcon
+  icon: LucideIcon;
   label: string;
   href: string;
 }
@@ -12,7 +13,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { icon: Calendar, label: "Agenda", href: "/agenda" },
   { icon: Users, label: "Clientes", href: "/clientes" },
-  { icon: Clock, label: "Horários", href: "/horarios" },
+  { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
   { icon: BellRing, label: "Notificações", href: "/notificacoes" },
   { icon: DollarSign, label: "Financeiro", href: "/financeiro" },
 ];
@@ -23,6 +24,7 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const location = useLocation();
 
   return (
     <div className="min-h-screen flex bg-background">
@@ -60,15 +62,24 @@ const Layout = ({ children }: LayoutProps) => {
         <nav className="flex-1 p-4 space-y-2">
           {navItems.map((item) => {
             const Icon = item.icon;
+            const isActive = location.pathname === item.href;
             return (
-              <a
+              <Link
                 key={item.label}
-                href={item.href}
-                className="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors group"
+                to={item.href}
+                className={cn(
+                  "flex items-center px-4 py-3 rounded-lg transition-colors group",
+                  isActive
+                    ? "bg-primary/10 text-primary"
+                    : "text-gray-700 hover:bg-gray-100"
+                )}
               >
-                <Icon className="w-5 h-5 mr-3 text-gray-400 group-hover:text-primary transition-colors" />
+                <Icon className={cn(
+                  "w-5 h-5 mr-3 transition-colors",
+                  isActive ? "text-primary" : "text-gray-400 group-hover:text-primary"
+                )} />
                 <span className="font-medium">{item.label}</span>
-              </a>
+              </Link>
             );
           })}
         </nav>
@@ -109,7 +120,9 @@ const Layout = ({ children }: LayoutProps) => {
               />
             </svg>
           </button>
-          <h1 className="text-xl font-semibold">Dashboard</h1>
+          <h1 className="text-xl font-semibold">
+            {navItems.find(item => item.href === location.pathname)?.label || "Dashboard"}
+          </h1>
         </header>
 
         {/* Page Content */}
