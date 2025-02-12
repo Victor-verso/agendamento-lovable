@@ -1,10 +1,10 @@
 
 import { useState } from "react";
-import { Calendar, Users, Clock, BellRing, DollarSign } from "lucide-react";
+import { Calendar, Users, Clock, BellRing, DollarSign, LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
-  icon: React.ComponentType;
+  icon: LucideIcon;  // Alterado aqui para usar o tipo LucideIcon
   label: string;
   href: string;
 }
@@ -58,16 +58,19 @@ const Layout = ({ children }: LayoutProps) => {
 
         {/* Navigation */}
         <nav className="flex-1 p-4 space-y-2">
-          {navItems.map((item) => (
-            <a
-              key={item.label}
-              href={item.href}
-              className="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors group"
-            >
-              <item.icon className="w-5 h-5 mr-3 text-gray-400 group-hover:text-primary transition-colors" />
-              <span className="font-medium">{item.label}</span>
-            </a>
-          ))}
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <a
+                key={item.label}
+                href={item.href}
+                className="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors group"
+              >
+                <Icon className="w-5 h-5 mr-3 text-gray-400 group-hover:text-primary transition-colors" />
+                <span className="font-medium">{item.label}</span>
+              </a>
+            );
+          })}
         </nav>
 
         {/* User Profile */}
