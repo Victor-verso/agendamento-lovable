@@ -36,6 +36,27 @@ const proximosAgendamentos = [
 const Agenda = () => {
   const [date, setDate] = useState<Date | undefined>(new Date());
 
+  // Cria um Set com as datas que têm agendamentos
+  const datasComAgendamento = new Set(
+    proximosAgendamentos.map((agendamento) => agendamento.data)
+  );
+
+  // Função para estilizar os dias com agendamentos
+  const modifiers = {
+    booked: (date: Date) => {
+      const dateString = date.toISOString().split('T')[0];
+      return datasComAgendamento.has(dateString);
+    },
+  };
+
+  const modifiersStyles = {
+    booked: {
+      backgroundColor: 'rgb(var(--primary) / 0.1)',
+      color: 'rgb(var(--primary))',
+      fontWeight: 'bold',
+    },
+  };
+
   return (
     <Layout>
       <div className="space-y-6">
@@ -73,6 +94,8 @@ const Agenda = () => {
             selected={date}
             onSelect={setDate}
             className="rounded-md border"
+            modifiers={modifiers}
+            modifiersStyles={modifiersStyles}
           />
         </div>
       </div>

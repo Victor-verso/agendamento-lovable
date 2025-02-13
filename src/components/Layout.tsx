@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { Calendar, Users, LayoutDashboard, BellRing, DollarSign, LucideIcon } from "lucide-react";
+import { Calendar, Users, LayoutDashboard, Settings, DollarSign, LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
 
@@ -8,14 +7,23 @@ interface NavItem {
   icon: LucideIcon;
   label: string;
   href: string;
+  subItems?: NavItem[];
 }
 
 const navItems: NavItem[] = [
   { icon: Calendar, label: "Agenda", href: "/agenda" },
   { icon: Users, label: "Clientes", href: "/clientes" },
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
-  { icon: BellRing, label: "Notificações", href: "/notificacoes" },
   { icon: DollarSign, label: "Financeiro", href: "/financeiro" },
+  { 
+    icon: Settings, 
+    label: "Configurações", 
+    href: "/configuracoes",
+    subItems: [
+      { icon: Calendar, label: "Horários", href: "/configuracoes/horarios" },
+      { icon: Calendar, label: "Notificações", href: "/notificacoes" },
+    ]
+  },
 ];
 
 interface LayoutProps {
@@ -24,18 +32,21 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [expandedItem, setExpandedItem] = useState<string | null>(null);
   const location = useLocation();
+
+  const toggleExpanded = (label: string) => {
+    setExpandedItem(expandedItem === label ? null : label);
+  };
 
   return (
     <div className="min-h-screen flex bg-background">
-      {/* Sidebar */}
       <aside
         className={cn(
           "fixed lg:static lg:flex flex-col w-64 h-screen transition-all duration-300 ease-in-out bg-white border-r shadow-sm",
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
-        {/* Logo */}
         <div className="flex items-center justify-between h-16 px-6 border-b">
           <span className="text-xl font-semibold text-primary">ServiceHub</span>
           <button
@@ -58,33 +69,62 @@ const Layout = ({ children }: LayoutProps) => {
           </button>
         </div>
 
-        {/* Navigation */}
         <nav className="flex-1 p-4 space-y-2">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = location.pathname === item.href;
+            const isActive = location.pathname === item.href || 
+                           (item.subItems?.some(sub => location.pathname === sub.href));
+            const isExpanded = expandedItem === item.label;
+
             return (
-              <Link
-                key={item.label}
-                to={item.href}
-                className={cn(
-                  "flex items-center px-4 py-3 rounded-lg transition-colors group",
-                  isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-gray-700 hover:bg-gray-100"
+              <div key={item.label}>
+                <Link
+                  to={item.subItems ? "#" : item.href}
+                  onClick={item.subItems ? () => toggleExpanded(item.label) : undefined}
+                  className={cn(
+                    "flex items-center px-4 py-3 rounded-lg transition-colors group",
+                    isActive
+                      ? "bg-primary/10 text-primary"
+                      : "text-gray-700 hover:bg-gray-100"
+                  )}
+                >
+                  <Icon className={cn(
+                    "w-5 h-5 mr-3 transition-colors",
+                    isActive ? "text-primary" : "text-gray-400 group-hover:text-primary"
+                  )} />
+                  <span className="font-medium">{item.label}</span>
+                </Link>
+                {item.subItems && isExpanded && (
+                  <div className="ml-6 mt-2 space-y-2">
+                    {item.subItems.map((subItem) => {
+                      const SubIcon = subItem.icon;
+                      const isSubActive = location.pathname === subItem.href;
+                      return (
+                        <Link
+                          key={subItem.href}
+                          to={subItem.href}
+                          className={cn(
+                            "flex items-center px-4 py-2 rounded-lg transition-colors group",
+                            isSubActive
+                              ? "bg-primary/10 text-primary"
+                              : "text-gray-700 hover:bg-gray-100"
+                          )}
+                        >
+                          <SubIcon className={cn(
+                            "w-4 h-4 mr-3 transition-colors",
+                            isSubActive ? "text-primary" : "text-gray-400 group-hover:text-primary"
+                          )} />
+                          <span className="font-medium text-sm">{subItem.label}</span>
+                        </Link>
+                      )
+                    })}
+                  </div>
                 )}
-              >
-                <Icon className={cn(
-                  "w-5 h-5 mr-3 transition-colors",
-                  isActive ? "text-primary" : "text-gray-400 group-hover:text-primary"
-                )} />
-                <span className="font-medium">{item.label}</span>
-              </Link>
+              </div>
             );
           })}
         </nav>
 
-        {/* User Profile */}
         <div className="p-4 border-t">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -98,9 +138,7 @@ const Layout = ({ children }: LayoutProps) => {
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className="flex-1 min-w-0 overflow-hidden">
-        {/* Top Bar */}
         <header className="h-16 border-b bg-white flex items-center px-6">
           <button
             onClick={() => setSidebarOpen(true)}
@@ -125,7 +163,6 @@ const Layout = ({ children }: LayoutProps) => {
           </h1>
         </header>
 
-        {/* Page Content */}
         <div className="p-6">{children}</div>
       </main>
     </div>
