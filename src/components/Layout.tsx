@@ -1,5 +1,6 @@
+
 import { useState } from "react";
-import { Calendar, Users, LayoutDashboard, Settings, DollarSign, LucideIcon } from "lucide-react";
+import { Calendar, Users, LayoutDashboard, Settings, Bell, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
 
@@ -14,14 +15,14 @@ const navItems: NavItem[] = [
   { icon: Calendar, label: "Agenda", href: "/agenda" },
   { icon: Users, label: "Clientes", href: "/clientes" },
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
-  { icon: DollarSign, label: "Financeiro", href: "/financeiro" },
   { 
     icon: Settings, 
     label: "Configurações", 
     href: "/configuracoes",
     subItems: [
-      { icon: Calendar, label: "Horários", href: "/configuracoes/horarios" },
-      { icon: Calendar, label: "Notificações", href: "/notificacoes" },
+      { icon: Clock, label: "Horários", href: "/configuracoes/horarios" },
+      { icon: Bell, label: "Notificações", href: "/notificacoes" },
+      { icon: Settings, label: "Personalização", href: "/configuracoes/personalizacao" },
     ]
   },
 ];
