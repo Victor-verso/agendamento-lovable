@@ -2,43 +2,27 @@
 import Layout from "@/components/Layout";
 import { Calendar } from "@/components/ui/calendar";
 import { Card } from "@/components/ui/card";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Clock } from "lucide-react";
-
-// Dados de exemplo - posteriormente serão carregados do backend
-const proximosAgendamentos = [
-  {
-    id: 1,
-    cliente: "Maria Silva",
-    servico: "Corte de Cabelo",
-    data: "2024-03-20",
-    horario: "14:30",
-    valor: "R$ 50,00",
-  },
-  {
-    id: 2,
-    cliente: "João Santos",
-    servico: "Barba",
-    data: "2024-03-20",
-    horario: "15:30",
-    valor: "R$ 30,00",
-  },
-  {
-    id: 3,
-    cliente: "Ana Oliveira",
-    servico: "Corte e Barba",
-    data: "2024-03-21",
-    horario: "10:00",
-    valor: "R$ 70,00",
-  },
-];
+import { db, Agendamento } from "@/data/mockDatabase";
 
 const Agenda = () => {
   const [date, setDate] = useState<Date | undefined>(new Date());
+  const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
+
+  useEffect(() => {
+    // Carregar agendamentos do banco de dados mockado
+    const loadAgendamentos = () => {
+      const todosAgendamentos = db.agendamentos.getAll();
+      setAgendamentos(todosAgendamentos);
+    };
+
+    loadAgendamentos();
+  }, []);
 
   // Cria um Set com as datas que têm agendamentos
   const datasComAgendamento = new Set(
-    proximosAgendamentos.map((agendamento) => agendamento.data)
+    agendamentos.map((agendamento) => agendamento.data)
   );
 
   // Função para estilizar os dias com agendamentos
@@ -64,26 +48,29 @@ const Agenda = () => {
         <div className="space-y-4">
           <h2 className="text-lg font-semibold">Próximos Agendamentos</h2>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {proximosAgendamentos.map((agendamento) => (
-              <Card key={agendamento.id} className="p-4">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-medium">{agendamento.cliente}</h3>
-                    <p className="text-sm text-gray-500">{agendamento.servico}</p>
+            {agendamentos.map((agendamento) => {
+              const cliente = db.clientes.getById(agendamento.clienteId);
+              return (
+                <Card key={agendamento.id} className="p-4">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="font-medium">{cliente?.nome}</h3>
+                      <p className="text-sm text-gray-500">{agendamento.servico}</p>
+                    </div>
+                    <span className="text-sm font-medium text-primary">
+                      {agendamento.valor}
+                    </span>
                   </div>
-                  <span className="text-sm font-medium text-primary">
-                    {agendamento.valor}
-                  </span>
-                </div>
-                <div className="mt-4 flex items-center text-sm text-gray-500">
-                  <Clock className="mr-2 h-4 w-4" />
-                  <span>
-                    {new Date(agendamento.data).toLocaleDateString('pt-BR')} às{' '}
-                    {agendamento.horario}
-                  </span>
-                </div>
-              </Card>
-            ))}
+                  <div className="mt-4 flex items-center text-sm text-gray-500">
+                    <Clock className="mr-2 h-4 w-4" />
+                    <span>
+                      {new Date(agendamento.data).toLocaleDateString('pt-BR')} às{' '}
+                      {agendamento.horario}
+                    </span>
+                  </div>
+                </Card>
+              );
+            })}
           </div>
         </div>
 

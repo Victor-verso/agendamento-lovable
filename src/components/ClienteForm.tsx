@@ -21,12 +21,7 @@ import { UserPlus } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
-
-const servicos = [
-  { id: 1, nome: "Corte de Cabelo", duracao: "30min", valor: "R$ 50,00" },
-  { id: 2, nome: "Barba", duracao: "20min", valor: "R$ 30,00" },
-  { id: 3, nome: "Corte e Barba", duracao: "50min", valor: "R$ 70,00" },
-];
+import { db } from "@/data/mockDatabase";
 
 const horarios = [
   "09:00",
@@ -55,25 +50,33 @@ const ClienteForm = () => {
   });
   const navigate = useNavigate();
   const { toast } = useToast();
+  const servicos = db.servicos.getAll();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Aqui você adicionaria a lógica para salvar no backend
-    const servicoSelecionado = servicos.find(s => s.id === Number(formData.servico));
-    
-    const novoAgendamento = {
-      id: Date.now(), // temporário, seria gerado pelo backend
-      cliente: formData.nome,
-      servico: servicoSelecionado?.nome || "",
-      data: formData.data,
-      horario: formData.horario,
-      valor: servicoSelecionado?.valor || "",
-    };
+    // Criar novo cliente
+    const novoCliente = db.clientes.create({
+      nome: formData.nome,
+      telefone: formData.telefone,
+      email: formData.email,
+    });
 
-    // Adicionar à lista de agendamentos (temporário, seria feito pelo backend)
-    // Em uma implementação real, isso seria gerenciado por um estado global ou banco de dados
+    // Buscar serviço selecionado
+    const servicoSelecionado = db.servicos.getById(Number(formData.servico));
     
+    if (servicoSelecionado) {
+      // Criar novo agendamento
+      db.agendamentos.create({
+        clienteId: novoCliente.id,
+        servico: servicoSelecionado.nome,
+        data: formData.data,
+        horario: formData.horario,
+        valor: servicoSelecionado.valor,
+        status: "agendado",
+      });
+    }
+
     toast({
       title: "Agendamento realizado!",
       description: "O cliente foi cadastrado com sucesso.",
