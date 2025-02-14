@@ -1,3 +1,4 @@
+
 import Layout from "@/components/Layout";
 import { Calendar } from "@/components/ui/calendar";
 import { Card } from "@/components/ui/card";
@@ -218,7 +219,21 @@ const Agenda = () => {
             }}
             locale={ptBR}
             className="rounded-md border"
-            renderDayContent={renderDayContent}
+            components={{
+              DayContent: ({ date: dayDate }) => {
+                const count = getAgendamentosPorDia(dayDate);
+                return (
+                  <div className="relative w-full h-full flex items-center justify-center">
+                    {dayDate.getDate()}
+                    {count > 0 && (
+                      <Badge variant="secondary" className="absolute -top-2 -right-2 h-4 w-4 p-0 flex items-center justify-center text-xs">
+                        {count}
+                      </Badge>
+                    )}
+                  </div>
+                );
+              }
+            }}
           />
         </div>
 
