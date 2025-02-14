@@ -1,4 +1,3 @@
-
 import Layout from "@/components/Layout";
 import { Calendar } from "@/components/ui/calendar";
 import { Card } from "@/components/ui/card";
@@ -20,7 +19,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 
 const Agenda = () => {
-  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [date, setDate] = useState<Date | undefined>(undefined);
   const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
   const [viewMode, setViewMode] = useState<"card" | "list">("card");
   const { toast } = useToast();
@@ -220,51 +219,37 @@ const Agenda = () => {
             locale={ptBR}
             className="rounded-md border"
             components={{
-              DayContent: ({ date: dayDate }) => {
-                const count = getAgendamentosPorDia(dayDate);
-                return (
-                  <div className="relative w-full h-full flex items-center justify-center">
-                    {dayDate.getDate()}
-                    {count > 0 && (
-                      <Badge variant="secondary" className="absolute -top-2 -right-2 h-4 w-4 p-0 flex items-center justify-center text-xs">
-                        {count}
-                      </Badge>
-                    )}
-                  </div>
-                );
-              }
+              DayContent: ({ date: dayDate }) => renderDayContent(dayDate)
             }}
           />
         </div>
 
-        {/* Histórico de Agendamentos */}
-        {historicoAgendamentos.length > 0 && !date && (
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-lg font-semibold">Histórico de Agendamentos</h2>
-              <div className="flex gap-2">
-                <Button
-                  variant={viewMode === "card" ? "default" : "outline"}
-                  size="icon"
-                  onClick={() => setViewMode("card")}
-                >
-                  <Grid className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={viewMode === "list" ? "default" : "outline"}
-                  size="icon"
-                  onClick={() => setViewMode("list")}
-                >
-                  <List className="h-4 w-4" />
-                </Button>
-              </div>
+        {/* Histórico de Agendamentos - Always visible */}
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg font-semibold">Histórico de Agendamentos</h2>
+            <div className="flex gap-2">
+              <Button
+                variant={viewMode === "card" ? "default" : "outline"}
+                size="icon"
+                onClick={() => setViewMode("card")}
+              >
+                <Grid className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === "list" ? "default" : "outline"}
+                size="icon"
+                onClick={() => setViewMode("list")}
+              >
+                <List className="h-4 w-4" />
+              </Button>
             </div>
-            {viewMode === "card" 
-              ? renderAgendamentosCard(historicoAgendamentos)
-              : renderAgendamentosTabela(historicoAgendamentos)
-            }
           </div>
-        )}
+          {viewMode === "card" 
+            ? renderAgendamentosCard(historicoAgendamentos)
+            : renderAgendamentosTabela(historicoAgendamentos)
+          }
+        </div>
       </div>
     </Layout>
   );

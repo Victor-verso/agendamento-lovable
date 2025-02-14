@@ -58,7 +58,26 @@ const Dashboard = () => {
     };
   };
 
+  const prepararDadosGrafico = () => {
+    // Agrupa agendamentos por data e soma os valores
+    const dadosAgrupados = agendamentos.reduce((acc, curr) => {
+      const valor = parseFloat(curr.valor.replace('R$ ', '').replace(',', '.'));
+      if (!acc[curr.data]) {
+        acc[curr.data] = 0;
+      }
+      acc[curr.data] += valor;
+      return acc;
+    }, {} as Record<string, number>);
+
+    // Converte para o formato esperado pelo gráfico
+    return Object.entries(dadosAgrupados).map(([data, valor]) => ({
+      data: format(parseISO(data), 'dd/MM'),
+      valor: valor,
+    })).sort((a, b) => a.data.localeCompare(b.data));
+  };
+
   const estatisticas = calcularEstatisticas();
+  const dadosGrafico = prepararDadosGrafico();
 
   return (
     <Layout>
@@ -95,12 +114,12 @@ const Dashboard = () => {
           <h3 className="font-semibold mb-4">Evolução de Agendamentos</h3>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={agendamentos}>
+              <BarChart data={dadosGrafico}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="data" />
                 <YAxis />
-                <Tooltip />
-                <Bar dataKey="valor" fill="#4f46e5" />
+                <Tooltip formatter={(value) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} />
+                <Bar dataKey="valor" fill="#4f46e5" name="Valor" />
               </BarChart>
             </ResponsiveContainer>
           </div>
