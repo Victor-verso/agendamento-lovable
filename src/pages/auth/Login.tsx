@@ -26,7 +26,8 @@ const Login = () => {
 
       if (error) throw error;
 
-      navigate("/servicos");
+      // Redirecionando para a página de agenda após o login
+      navigate("/agenda");
     } catch (error: any) {
       toast({
         title: "Erro ao fazer login",
