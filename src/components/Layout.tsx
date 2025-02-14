@@ -1,5 +1,6 @@
+
 import { useState } from "react";
-import { Calendar, Users, LayoutDashboard, Settings, Bell, Clock, type LucideIcon } from "lucide-react";
+import { Calendar, Users, LayoutDashboard, Settings, Bell, Clock, type LucideIcon, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
 
@@ -19,6 +20,7 @@ const navItems: NavItem[] = [
     label: "Configurações", 
     href: "/configuracoes",
     subItems: [
+      { icon: User, label: "Conta", href: "/configuracoes/conta" },
       { icon: Clock, label: "Horários", href: "/configuracoes/horarios" },
       { icon: Bell, label: "Notificações", href: "/notificacoes" },
       { icon: Settings, label: "Personalização", href: "/configuracoes/personalizacao" },

@@ -1,4 +1,3 @@
-
 import Layout from "@/components/Layout";
 import { Calendar } from "@/components/ui/calendar";
 import { Card } from "@/components/ui/card";
@@ -7,7 +6,7 @@ import { Clock, Trash2, Grid, List } from "lucide-react";
 import { db, Agendamento } from "@/data/mockDatabase";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { format, parseISO, compareAsc, isAfter } from "date-fns";
+import { format, parseISO, compareAsc, isAfter, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
   Table,
@@ -17,6 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 
 const Agenda = () => {
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -25,20 +25,20 @@ const Agenda = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    const loadAgendamentos = () => {
-      const todosAgendamentos = db.agendamentos.getAll();
-      const sortedAgendamentos = todosAgendamentos.sort((a, b) => {
-        const dateCompare = compareAsc(parseISO(a.data), parseISO(b.data));
-        if (dateCompare === 0) {
-          return a.horario.localeCompare(b.horario);
-        }
-        return dateCompare;
-      });
-      setAgendamentos(sortedAgendamentos);
-    };
-
     loadAgendamentos();
   }, []);
+
+  const loadAgendamentos = () => {
+    const todosAgendamentos = db.agendamentos.getAll();
+    const sortedAgendamentos = todosAgendamentos.sort((a, b) => {
+      const dateCompare = compareAsc(parseISO(a.data), parseISO(b.data));
+      if (dateCompare === 0) {
+        return a.horario.localeCompare(b.horario);
+      }
+      return dateCompare;
+    });
+    setAgendamentos(sortedAgendamentos);
+  };
 
   const handleDeleteAgendamento = (id: number) => {
     const newAgendamentos = agendamentos.filter(a => a.id !== id);
@@ -52,6 +52,9 @@ const Agenda = () => {
   const agora = new Date();
   const proximosAgendamentos = agendamentos.filter(agendamento => {
     const dataHoraAgendamento = parseISO(`${agendamento.data}T${agendamento.horario}`);
+    if (date) {
+      return isSameDay(parseISO(agendamento.data), date);
+    }
     return isAfter(dataHoraAgendamento, agora);
   });
 
@@ -59,6 +62,27 @@ const Agenda = () => {
     const dataHoraAgendamento = parseISO(`${agendamento.data}T${agendamento.horario}`);
     return !isAfter(dataHoraAgendamento, agora);
   });
+
+  const getAgendamentosPorDia = (data: Date) => {
+    return agendamentos.filter(agendamento => 
+      isSameDay(parseISO(agendamento.data), data)
+    ).length;
+  };
+
+  const renderDayContent = (day: Date) => {
+    const count = getAgendamentosPorDia(day);
+    if (count > 0) {
+      return (
+        <div className="relative">
+          {day.getDate()}
+          <Badge variant="secondary" className="absolute -top-2 -right-2 h-4 w-4 p-0 flex items-center justify-center text-xs">
+            {count}
+          </Badge>
+        </div>
+      );
+    }
+    return day.getDate();
+  };
 
   const renderAgendamentosTabela = (agendamentos: Agendamento[]) => (
     <Table>
@@ -154,7 +178,9 @@ const Agenda = () => {
         {/* Próximos Agendamentos */}
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <h2 className="text-lg font-semibold">Próximos Agendamentos</h2>
+            <h2 className="text-lg font-semibold">
+              {date ? `Agendamentos para ${format(date, "dd 'de' MMMM", { locale: ptBR })}` : 'Próximos Agendamentos'}
+            </h2>
             <div className="flex gap-2">
               <Button
                 variant={viewMode === "card" ? "default" : "outline"}
@@ -183,13 +209,21 @@ const Agenda = () => {
           <Calendar
             mode="single"
             selected={date}
-            onSelect={setDate}
+            onSelect={(newDate) => {
+              if (date && isSameDay(date, newDate || new Date())) {
+                setDate(undefined);
+              } else {
+                setDate(newDate);
+              }
+            }}
+            locale={ptBR}
             className="rounded-md border"
+            renderDayContent={renderDayContent}
           />
         </div>
 
         {/* Histórico de Agendamentos */}
-        {historicoAgendamentos.length > 0 && (
+        {historicoAgendamentos.length > 0 && !date && (
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <h2 className="text-lg font-semibold">Histórico de Agendamentos</h2>

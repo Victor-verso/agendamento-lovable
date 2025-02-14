@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import Notificacoes from "./pages/Notificacoes";
 import Horarios from "./pages/Configuracoes/Horarios";
 import Personalizacao from "./pages/Configuracoes/Personalizacao";
+import Conta from "./pages/Configuracoes/Conta";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -24,7 +25,7 @@ const queryClient = new QueryClient({
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -37,6 +38,7 @@ const App = () => (
             <Route path="/notificacoes" element={<Notificacoes />} />
             <Route path="/configuracoes/horarios" element={<Horarios />} />
             <Route path="/configuracoes/personalizacao" element={<Personalizacao />} />
+            <Route path="/configuracoes/conta" element={<Conta />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

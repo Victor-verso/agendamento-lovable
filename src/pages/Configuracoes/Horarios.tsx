@@ -5,14 +5,14 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 
 interface DiaConfig {
   ativo: boolean;
   inicio: string;
   fim: string;
-  intervalo: number; // em minutos
+  intervalo: number;
 }
 
 const diasSemana = [
@@ -25,19 +25,29 @@ const diasSemana = [
   "Sábado",
 ];
 
+const configPadrao = diasSemana.map(() => ({
+  ativo: false,
+  inicio: "09:00",
+  fim: "18:00",
+  intervalo: 30,
+}));
+
 const Horarios = () => {
-  const [config, setConfig] = useState<DiaConfig[]>(
-    diasSemana.map(() => ({
-      ativo: false,
-      inicio: "09:00",
-      fim: "18:00",
-      intervalo: 30,
-    }))
-  );
+  const [config, setConfig] = useState<DiaConfig[]>(() => {
+    const saved = localStorage.getItem("horarios-config");
+    return saved ? JSON.parse(saved) : configPadrao;
+  });
   const { toast } = useToast();
 
+  useEffect(() => {
+    const saved = localStorage.getItem("horarios-config");
+    if (saved) {
+      setConfig(JSON.parse(saved));
+    }
+  }, []);
+
   const handleSave = () => {
-    // Aqui salvaria no banco de dados
+    localStorage.setItem("horarios-config", JSON.stringify(config));
     toast({
       title: "Configurações salvas",
       description: "As configurações de horário foram atualizadas com sucesso.",
