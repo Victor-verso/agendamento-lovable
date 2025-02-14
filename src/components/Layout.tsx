@@ -95,7 +95,7 @@ const Layout = ({
               <span className="text-primary font-medium">VM</span>
             </div>
             <div>
-              <p className="font-medium">John Doe</p>
+              <p className="font-medium">Victor Martins</p>
               <p className="text-sm text-gray-500">Profissional</p>
             </div>
           </div>
