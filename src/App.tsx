@@ -1,50 +1,48 @@
 
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import Index from "./pages/Index";
-import Agenda from "./pages/Agenda";
-import Clientes from "./pages/Clientes";
-import Dashboard from "./pages/Dashboard";
-import Notificacoes from "./pages/Notificacoes";
-import Horarios from "./pages/Configuracoes/Horarios";
-import Personalizacao from "./pages/Configuracoes/Personalizacao";
-import Conta from "./pages/Configuracoes/Conta";
-import NotFound from "./pages/NotFound";
+import Login from "@/pages/auth/Login";
+import Register from "@/pages/auth/Register";
+import RecuperarSenha from "@/pages/auth/RecuperarSenha";
+import Agenda from "@/pages/Agenda";
+import Dashboard from "@/pages/Dashboard";
+import Clientes from "@/pages/Clientes";
+import Financeiro from "@/pages/Financeiro";
+import Notificacoes from "@/pages/Notificacoes";
+import ConfiguracoesConta from "@/pages/Configuracoes/Conta";
+import ConfiguracoesHorarios from "@/pages/Configuracoes/Horarios";
+import ConfiguracoesPersonalizacao from "@/pages/Configuracoes/Personalizacao";
+import NotFound from "@/pages/NotFound";
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 60 * 1000,
-    },
-  },
-});
+function App() {
+  return (
+    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+      <Router>
+        <Routes>
+          {/* Auth Routes */}
+          <Route path="/auth/login" element={<Login />} />
+          <Route path="/auth/cadastro" element={<Register />} />
+          <Route path="/auth/recuperar-senha" element={<RecuperarSenha />} />
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/agenda" element={<Agenda />} />
-            <Route path="/clientes" element={<Clientes />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/notificacoes" element={<Notificacoes />} />
-            <Route path="/configuracoes/horarios" element={<Horarios />} />
-            <Route path="/configuracoes/personalizacao" element={<Personalizacao />} />
-            <Route path="/configuracoes/conta" element={<Conta />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+          {/* Protected Routes */}
+          <Route path="/agenda" element={<Agenda />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/clientes" element={<Clientes />} />
+          <Route path="/financeiro" element={<Financeiro />} />
+          <Route path="/notificacoes" element={<Notificacoes />} />
+          <Route path="/configuracoes/conta" element={<ConfiguracoesConta />} />
+          <Route path="/configuracoes/horarios" element={<ConfiguracoesHorarios />} />
+          <Route
+            path="/configuracoes/personalizacao"
+            element={<ConfiguracoesPersonalizacao />}
+          />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Router>
+      <Toaster />
     </ThemeProvider>
-  </QueryClientProvider>
-);
+  );
+}
 
 export default App;
