@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { Calendar, Users, LayoutDashboard, Settings, Bell, Clock } from "lucide-react";
+import { Calendar, Users, LayoutDashboard, Settings, Bell, Clock, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
 
