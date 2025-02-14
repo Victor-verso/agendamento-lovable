@@ -1,3 +1,4 @@
+
 import Layout from "@/components/Layout";
 import { Calendar } from "@/components/ui/calendar";
 import { Card } from "@/components/ui/card";
@@ -74,14 +75,14 @@ const Agenda = () => {
     if (count > 0) {
       return (
         <div className="relative">
-          {day.getDate()}
+          <span>{day.getDate()}</span>
           <Badge variant="secondary" className="absolute -top-2 -right-2 h-4 w-4 p-0 flex items-center justify-center text-xs">
             {count}
           </Badge>
         </div>
       );
     }
-    return day.getDate();
+    return <span>{day.getDate()}</span>;
   };
 
   const renderAgendamentosTabela = (agendamentos: Agendamento[]) => (
