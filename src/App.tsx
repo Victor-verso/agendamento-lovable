@@ -1,11 +1,12 @@
 
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
 import RecuperarSenha from "@/pages/auth/RecuperarSenha";
 import Agenda from "@/pages/Agenda";
+import Servicos from "@/pages/Servicos";
 import Dashboard from "@/pages/Dashboard";
 import Clientes from "@/pages/Clientes";
 import Financeiro from "@/pages/Financeiro";
@@ -27,6 +28,7 @@ function App() {
 
           {/* Protected Routes */}
           <Route path="/agenda" element={<Agenda />} />
+          <Route path="/servicos" element={<Servicos />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/clientes" element={<Clientes />} />
           <Route path="/financeiro" element={<Financeiro />} />
@@ -37,6 +39,10 @@ function App() {
             path="/configuracoes/personalizacao"
             element={<ConfiguracoesPersonalizacao />}
           />
+          
+          {/* Redirect root to services */}
+          <Route path="/" element={<Navigate to="/servicos" replace />} />
+          
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
