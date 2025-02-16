@@ -81,7 +81,6 @@ const Conta = () => {
         id: user.id,
         nome,
         avatar_url: imagem,
-        updated_at: new Date().toISOString(),
       };
 
       const { error } = await supabase
