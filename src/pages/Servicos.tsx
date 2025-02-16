@@ -1,7 +1,5 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import Layout from "@/components/Layout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,9 +11,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Input } from "@/components/ui/input";
 import {
-  Search,
   Clock,
   Star,
   MapPin,
@@ -26,7 +22,6 @@ import {
   Coffee,
 } from "lucide-react";
 import type { Service } from "@/types/database";
-import type { Json } from "@/integrations/supabase/types";
 
 interface BarbershopInfo {
   id: string;
@@ -40,8 +35,6 @@ interface BarbershopInfo {
     instagram?: string;
     whatsapp?: string;
   };
-  created_at?: string;
-  updated_at?: string;
 }
 
 interface BarbershopImage {
@@ -148,7 +141,7 @@ const Servicos = () => {
   }
 
   return (
-    <Layout>
+    <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <Carousel className="w-full max-w-5xl mx-auto">
@@ -399,7 +392,7 @@ const Servicos = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </Layout>
+    </div>
   );
 };
 
