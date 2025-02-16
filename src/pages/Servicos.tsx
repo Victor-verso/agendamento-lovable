@@ -1,14 +1,67 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import Layout from "@/components/Layout"; // Corrigindo a importação do Layout
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import Layout from "@/components/Layout";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
-import { Search, Clock, Star } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import { Input } from "@/components/ui/input";
+import {
+  Search,
+  Clock,
+  Star,
+  MapPin,
+  Instagram,
+  Phone,
+  Calendar,
+  CreditCard,
+  Coffee,
+} from "lucide-react";
 import type { Service } from "@/types/database";
+
+interface BarbershopInfo {
+  id: string;
+  name: string;
+  address: string;
+  about: string;
+  working_hours: Record<string, string>;
+  amenities: string[];
+  payment_methods: string[];
+  social_media: {
+    instagram?: string;
+    whatsapp?: string;
+  };
+}
+
+interface BarbershopImage {
+  id: string;
+  image_url: string;
+  order_index: number;
+}
+
+interface Professional {
+  id: string;
+  name: string;
+  photo_url: string | null;
+  experience_years: number;
+  bio: string | null;
+}
+
+interface Product {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  image_url: string | null;
+}
 
 const CATEGORIES = [
   { id: "todos", label: "Todos" },
@@ -18,59 +71,56 @@ const CATEGORIES = [
 ];
 
 const Servicos = () => {
+  const [barbershopInfo, setBarbershopInfo] = useState<BarbershopInfo | null>(null);
+  const [carouselImages, setCarouselImages] = useState<BarbershopImage[]>([]);
   const [services, setServices] = useState<Service[]>([]);
-  const [filteredServices, setFilteredServices] = useState<Service[]>([]);
+  const [professionals, setProfessionals] = useState<Professional[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("todos");
   const [searchQuery, setSearchQuery] = useState("");
-  const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
 
   useEffect(() => {
-    loadServices();
+    loadInitialData();
   }, []);
 
-  useEffect(() => {
-    filterServices();
-  }, [selectedCategory, searchQuery, services]);
-
-  const loadServices = async () => {
+  const loadInitialData = async () => {
     try {
-      const { data, error } = await supabase
-        .from("services")
-        .select("*")
-        .order("name");
+      const [
+        barbershopResponse,
+        imagesResponse,
+        servicesResponse,
+        professionalsResponse,
+        productsResponse,
+        reviewsResponse,
+      ] = await Promise.all([
+        supabase.from("barbershop_info").select("*").single(),
+        supabase.from("barbershop_images").select("*").order("order_index"),
+        supabase.from("services").select("*").order("name"),
+        supabase.from("professionals").select("*"),
+        supabase.from("products").select("*"),
+        supabase.from("reviews").select("*").order("created_at.desc"),
+      ]);
 
-      if (error) throw error;
-
-      setServices(data);
-      setFilteredServices(data);
-    } catch (error: any) {
-      toast({
-        title: "Erro ao carregar serviços",
-        description: error.message,
-        variant: "destructive",
-      });
+      if (barbershopResponse.data) setBarbershopInfo(barbershopResponse.data);
+      if (imagesResponse.data) setCarouselImages(imagesResponse.data);
+      if (servicesResponse.data) setServices(servicesResponse.data);
+      if (professionalsResponse.data) setProfessionals(professionalsResponse.data);
+      if (productsResponse.data) setProducts(productsResponse.data);
+      if (reviewsResponse.data) setReviews(reviewsResponse.data);
+    } catch (error) {
+      console.error("Erro ao carregar dados:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const filterServices = () => {
-    let filtered = [...services];
-
-    // Filtrar por categoria
-    if (selectedCategory !== "todos") {
-      filtered = filtered.filter((service) => service.category === selectedCategory);
-    }
-
-    // Filtrar por busca
-    if (searchQuery) {
-      filtered = filtered.filter((service) =>
-        service.name.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    setFilteredServices(filtered);
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(price);
   };
 
   const formatDuration = (minutes: number) => {
@@ -81,82 +131,268 @@ const Servicos = () => {
       : `${mins}min`;
   };
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(price);
-  };
+  if (loading) {
+    return <div className="text-center py-8">Carregando...</div>;
+  }
 
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col space-y-6">
-          {/* Barra de busca */}
-          <div className="relative">
-            <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-            <Input
-              type="text"
-              placeholder="Buscar serviços..."
-              className="pl-10"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+        {/* Carrossel e Informações */}
+        <div className="mb-8">
+          <Carousel className="w-full max-w-5xl mx-auto">
+            <CarouselContent>
+              {carouselImages.map((image) => (
+                <CarouselItem key={image.id}>
+                  <div className="relative h-[400px] w-full">
+                    <img
+                      src={image.image_url}
+                      alt="Barbearia"
+                      className="w-full h-full object-cover rounded-lg"
+                    />
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious />
+            <CarouselNext />
+          </Carousel>
 
-          {/* Filtros de categoria */}
-          <div className="flex flex-wrap gap-2">
-            {CATEGORIES.map((category) => (
-              <Button
-                key={category.id}
-                variant={selectedCategory === category.id ? "default" : "outline"}
-                onClick={() => setSelectedCategory(category.id)}
-              >
-                {category.label}
-              </Button>
-            ))}
+          <div className="mt-4 text-center">
+            <h1 className="text-3xl font-bold">{barbershopInfo?.name}</h1>
+            <p className="flex items-center justify-center mt-2 text-gray-600">
+              <MapPin className="w-4 h-4 mr-1" />
+              {barbershopInfo?.address}
+            </p>
           </div>
+        </div>
 
-          {/* Lista de serviços */}
-          {loading ? (
-            <div className="text-center py-8">Carregando serviços...</div>
-          ) : (
+        {/* Tabs de navegação */}
+        <Tabs defaultValue="servicos" className="w-full">
+          <TabsList className="w-full justify-start mb-8">
+            <TabsTrigger value="servicos">Serviços</TabsTrigger>
+            <TabsTrigger value="detalhes">Detalhes</TabsTrigger>
+            <TabsTrigger value="profissionais">Profissionais</TabsTrigger>
+            <TabsTrigger value="produtos">Produtos</TabsTrigger>
+            <TabsTrigger value="avaliacoes">Avaliações</TabsTrigger>
+          </TabsList>
+
+          {/* Conteúdo da aba Serviços */}
+          <TabsContent value="servicos">
+            <div className="space-y-6">
+              <div className="flex flex-wrap gap-2">
+                {CATEGORIES.map((category) => (
+                  <Button
+                    key={category.id}
+                    variant={selectedCategory === category.id ? "default" : "outline"}
+                    onClick={() => setSelectedCategory(category.id)}
+                  >
+                    {category.label}
+                  </Button>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {services
+                  .filter(
+                    (service) =>
+                      selectedCategory === "todos" ||
+                      service.category === selectedCategory
+                  )
+                  .map((service) => (
+                    <Card key={service.id} className="hover:shadow-lg transition-shadow">
+                      <CardHeader>
+                        <CardTitle>{service.name}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <p className="text-sm text-gray-600">{service.description}</p>
+                          <div className="flex justify-between items-center">
+                            <span className="text-2xl font-bold text-primary">
+                              {formatPrice(service.price)}
+                            </span>
+                            <Badge variant="secondary">
+                              <Clock className="w-4 h-4 mr-1" />
+                              {formatDuration(service.duration)}
+                            </Badge>
+                          </div>
+                          <Button className="w-full">Agendar</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Conteúdo da aba Detalhes */}
+          <TabsContent value="detalhes">
+            <div className="space-y-8">
+              <section>
+                <h3 className="text-xl font-semibold mb-4">Sobre</h3>
+                <p className="text-gray-600">{barbershopInfo?.about}</p>
+              </section>
+
+              <section>
+                <h3 className="text-xl font-semibold mb-4">Comodidades</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {barbershopInfo?.amenities.map((amenity, index) => (
+                    <div key={index} className="flex items-center">
+                      <Coffee className="w-4 h-4 mr-2 text-primary" />
+                      <span>{amenity}</span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              <section>
+                <h3 className="text-xl font-semibold mb-4">Horários de Atendimento</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {Object.entries(barbershopInfo?.working_hours || {}).map(
+                    ([day, hours]) => (
+                      <div key={day} className="flex justify-between items-center">
+                        <span className="font-medium">{day}</span>
+                        <span className="text-gray-600">{hours}</span>
+                      </div>
+                    )
+                  )}
+                </div>
+              </section>
+
+              <section>
+                <h3 className="text-xl font-semibold mb-4">Formas de Pagamento</h3>
+                <div className="flex flex-wrap gap-4">
+                  {barbershopInfo?.payment_methods.map((method, index) => (
+                    <div key={index} className="flex items-center">
+                      <CreditCard className="w-4 h-4 mr-2 text-primary" />
+                      <span>{method}</span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              <section>
+                <h3 className="text-xl font-semibold mb-4">Redes Sociais</h3>
+                <div className="flex space-x-4">
+                  {barbershopInfo?.social_media.instagram && (
+                    <a
+                      href={barbershopInfo.social_media.instagram}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center text-primary hover:underline"
+                    >
+                      <Instagram className="w-5 h-5 mr-1" />
+                      Instagram
+                    </a>
+                  )}
+                  {barbershopInfo?.social_media.whatsapp && (
+                    <a
+                      href={`https://wa.me/${barbershopInfo.social_media.whatsapp}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center text-primary hover:underline"
+                    >
+                      <Phone className="w-5 h-5 mr-1" />
+                      WhatsApp
+                    </a>
+                  )}
+                </div>
+              </section>
+            </div>
+          </TabsContent>
+
+          {/* Conteúdo da aba Profissionais */}
+          <TabsContent value="profissionais">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredServices.map((service) => (
-                <Card key={service.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <CardTitle>{service.name}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-2xl font-bold text-primary">
-                          {formatPrice(service.price)}
-                        </span>
-                        <Badge variant="secondary">
-                          <Clock className="w-4 h-4 mr-1" />
-                          {formatDuration(service.duration)}
-                        </Badge>
+              {professionals.map((professional) => (
+                <Card key={professional.id}>
+                  <CardContent className="pt-6">
+                    <div className="text-center">
+                      <div className="relative w-32 h-32 mx-auto mb-4">
+                        <img
+                          src={professional.photo_url || "/placeholder.svg"}
+                          alt={professional.name}
+                          className="w-full h-full object-cover rounded-full"
+                        />
                       </div>
-                      <div className="flex items-center space-x-1">
-                        <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                        <span className="text-sm text-gray-600">4.5 (28 avaliações)</span>
-                      </div>
-                      <Button
-                        className="w-full"
-                        onClick={() => {
-                          // Navegar para a seleção de profissional
-                        }}
-                      >
-                        Agendar
-                      </Button>
+                      <h3 className="text-xl font-semibold">{professional.name}</h3>
+                      <p className="text-gray-600 mt-1">
+                        {professional.experience_years} anos de experiência
+                      </p>
+                      {professional.bio && (
+                        <p className="text-sm text-gray-600 mt-4">{professional.bio}</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
-          )}
-        </div>
+          </TabsContent>
+
+          {/* Conteúdo da aba Produtos */}
+          <TabsContent value="produtos">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {products.map((product) => (
+                <Card key={product.id}>
+                  {product.image_url && (
+                    <div className="relative h-48 w-full">
+                      <img
+                        src={product.image_url}
+                        alt={product.name}
+                        className="w-full h-full object-cover rounded-t-lg"
+                      />
+                    </div>
+                  )}
+                  <CardHeader>
+                    <CardTitle className="text-lg">{product.name}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-600 mb-4">{product.description}</p>
+                    <p className="text-xl font-bold text-primary">
+                      {formatPrice(product.price)}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Conteúdo da aba Avaliações */}
+          <TabsContent value="avaliacoes">
+            <div className="space-y-6">
+              {reviews.map((review) => (
+                <Card key={review.id}>
+                  <CardContent className="pt-6">
+                    <div className="flex items-start space-x-4">
+                      <div className="flex-1">
+                        <div className="flex items-center mb-2">
+                          <div className="flex">
+                            {[...Array(5)].map((_, index) => (
+                              <Star
+                                key={index}
+                                className={`w-4 h-4 ${
+                                  index < review.rating
+                                    ? "text-yellow-400 fill-yellow-400"
+                                    : "text-gray-300"
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          <span className="text-sm text-gray-600 ml-2">
+                            {new Date(review.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                        {review.comment && (
+                          <p className="text-gray-600">{review.comment}</p>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </Layout>
   );

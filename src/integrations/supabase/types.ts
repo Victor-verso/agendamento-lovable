@@ -63,6 +63,77 @@ export type Database = {
           },
         ]
       }
+      barbershop_images: {
+        Row: {
+          barbershop_id: string | null
+          created_at: string | null
+          id: string
+          image_url: string
+          order_index: number
+        }
+        Insert: {
+          barbershop_id?: string | null
+          created_at?: string | null
+          id?: string
+          image_url: string
+          order_index?: number
+        }
+        Update: {
+          barbershop_id?: string | null
+          created_at?: string | null
+          id?: string
+          image_url?: string
+          order_index?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "barbershop_images_barbershop_id_fkey"
+            columns: ["barbershop_id"]
+            isOneToOne: false
+            referencedRelation: "barbershop_info"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      barbershop_info: {
+        Row: {
+          about: string | null
+          address: string
+          amenities: Json
+          created_at: string | null
+          id: string
+          name: string
+          payment_methods: Json
+          social_media: Json
+          updated_at: string | null
+          working_hours: Json
+        }
+        Insert: {
+          about?: string | null
+          address: string
+          amenities?: Json
+          created_at?: string | null
+          id?: string
+          name: string
+          payment_methods?: Json
+          social_media?: Json
+          updated_at?: string | null
+          working_hours?: Json
+        }
+        Update: {
+          about?: string | null
+          address?: string
+          amenities?: Json
+          created_at?: string | null
+          id?: string
+          name?: string
+          payment_methods?: Json
+          social_media?: Json
+          updated_at?: string | null
+          working_hours?: Json
+        }
+        Relationships: []
+      }
       client_profiles: {
         Row: {
           avatar_url: string | null
@@ -120,6 +191,39 @@ export type Database = {
           title?: string
           type?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          name: string
+          price: number
+          stock: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          price: number
+          stock?: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          price?: number
+          stock?: number
+          updated_at?: string | null
         }
         Relationships: []
       }
