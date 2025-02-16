@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/Layout";
@@ -97,12 +98,12 @@ const Servicos = () => {
         productsResponse,
         reviewsResponse,
       ] = await Promise.all([
-        supabase.from("barbershop_info").select("*").single(),
+        supabase.from("barbershop_info").select("*").maybeSingle(),
         supabase.from("barbershop_images").select("*").order("order_index"),
         supabase.from("services").select("*").order("name"),
         supabase.from("professionals").select("*"),
         supabase.from("products").select("*"),
-        supabase.from("reviews").select("*").order("created_at.desc"),
+        supabase.from("reviews").select("*").order("created_at", { ascending: false }),
       ]);
 
       if (barbershopResponse.data) {
