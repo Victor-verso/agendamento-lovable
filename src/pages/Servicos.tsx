@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/Layout";
@@ -26,12 +25,13 @@ import {
   Coffee,
 } from "lucide-react";
 import type { Service } from "@/types/database";
+import type { Json } from "@/integrations/supabase/types";
 
 interface BarbershopInfo {
   id: string;
   name: string;
   address: string;
-  about: string;
+  about: string | null;
   working_hours: Record<string, string>;
   amenities: string[];
   payment_methods: string[];
@@ -39,6 +39,8 @@ interface BarbershopInfo {
     instagram?: string;
     whatsapp?: string;
   };
+  created_at?: string;
+  updated_at?: string;
 }
 
 interface BarbershopImage {
@@ -103,7 +105,16 @@ const Servicos = () => {
         supabase.from("reviews").select("*").order("created_at.desc"),
       ]);
 
-      if (barbershopResponse.data) setBarbershopInfo(barbershopResponse.data);
+      if (barbershopResponse.data) {
+        const info = barbershopResponse.data;
+        setBarbershopInfo({
+          ...info,
+          working_hours: info.working_hours as Record<string, string>,
+          amenities: info.amenities as string[],
+          payment_methods: info.payment_methods as string[],
+          social_media: info.social_media as { instagram?: string; whatsapp?: string },
+        });
+      }
       if (imagesResponse.data) setCarouselImages(imagesResponse.data);
       if (servicesResponse.data) setServices(servicesResponse.data);
       if (professionalsResponse.data) setProfessionals(professionalsResponse.data);
@@ -138,7 +149,6 @@ const Servicos = () => {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
-        {/* Carrossel e Informações */}
         <div className="mb-8">
           <Carousel className="w-full max-w-5xl mx-auto">
             <CarouselContent>
@@ -167,7 +177,6 @@ const Servicos = () => {
           </div>
         </div>
 
-        {/* Tabs de navegação */}
         <Tabs defaultValue="servicos" className="w-full">
           <TabsList className="w-full justify-start mb-8">
             <TabsTrigger value="servicos">Serviços</TabsTrigger>
@@ -177,7 +186,6 @@ const Servicos = () => {
             <TabsTrigger value="avaliacoes">Avaliações</TabsTrigger>
           </TabsList>
 
-          {/* Conteúdo da aba Serviços */}
           <TabsContent value="servicos">
             <div className="space-y-6">
               <div className="flex flex-wrap gap-2">
@@ -225,7 +233,6 @@ const Servicos = () => {
             </div>
           </TabsContent>
 
-          {/* Conteúdo da aba Detalhes */}
           <TabsContent value="detalhes">
             <div className="space-y-8">
               <section>
@@ -301,7 +308,6 @@ const Servicos = () => {
             </div>
           </TabsContent>
 
-          {/* Conteúdo da aba Profissionais */}
           <TabsContent value="profissionais">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {professionals.map((professional) => (
@@ -329,7 +335,6 @@ const Servicos = () => {
             </div>
           </TabsContent>
 
-          {/* Conteúdo da aba Produtos */}
           <TabsContent value="produtos">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {products.map((product) => (
@@ -357,7 +362,6 @@ const Servicos = () => {
             </div>
           </TabsContent>
 
-          {/* Conteúdo da aba Avaliações */}
           <TabsContent value="avaliacoes">
             <div className="space-y-6">
               {reviews.map((review) => (
