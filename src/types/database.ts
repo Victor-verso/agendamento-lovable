@@ -8,6 +8,7 @@ export type Service = {
   category: 'cabelo' | 'barba' | 'outros';
   created_at: string;
   updated_at: string;
+  image_url?: string | null;
 };
 
 export type ServiceImage = {

@@ -28,7 +28,7 @@ const Servicos = () => {
     description: "",
     price: "",
     duration: "",
-    category: "cabelo",
+    category: "cabelo" as const,
     image: null as File | null,
   });
 
@@ -77,14 +77,16 @@ const Servicos = () => {
         imageUrl = await handleImageUpload(newService.image);
       }
 
-      const { error } = await supabase.from("services").insert({
+      const serviceData = {
         name: newService.name,
-        description: newService.description,
+        description: newService.description || "",
         price: parseFloat(newService.price),
         duration: parseInt(newService.duration),
         category: newService.category,
         image_url: imageUrl,
-      });
+      };
+
+      const { error } = await supabase.from("services").insert(serviceData);
 
       if (error) throw error;
 
@@ -98,7 +100,7 @@ const Servicos = () => {
         description: "",
         price: "",
         duration: "",
-        category: "cabelo",
+        category: "cabelo" as const,
         image: null,
       });
 
