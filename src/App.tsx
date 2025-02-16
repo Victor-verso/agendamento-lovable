@@ -20,6 +20,12 @@ import Horarios from "@/pages/Configuracoes/Horarios";
 import Personalizacao from "@/pages/Configuracoes/Personalizacao";
 import Servicos from "@/pages/Configuracoes/Servicos";
 
+// Cliente
+import ClienteLayout from "@/components/ClienteLayout";
+import AgendarServico from "@/pages/cliente/AgendarServico";
+import MeusAgendamentos from "@/pages/cliente/MeusAgendamentos";
+import PerfilCliente from "@/pages/cliente/PerfilCliente";
+
 const App = () => {
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
@@ -29,6 +35,14 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/recuperar-senha" element={<RecuperarSenha />} />
+          
+          {/* Rotas do Cliente */}
+          <Route path="/cliente" element={<ClienteLayout />}>
+            <Route path="agendar" element={<AgendarServico />} />
+            <Route path="agendamentos" element={<MeusAgendamentos />} />
+            <Route path="perfil" element={<PerfilCliente />} />
+          </Route>
+
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/agenda" element={<Agenda />} />
           <Route path="/clientes" element={<Clientes />} />

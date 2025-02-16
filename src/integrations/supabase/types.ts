@@ -468,6 +468,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      appointment_status: "pending" | "confirmed" | "cancelled" | "completed"
       service_category: "cabelo" | "barba" | "outros"
     }
     CompositeTypes: {
