@@ -65,7 +65,29 @@ const Layout = ({
           </button>
         </div>
 
-        
+        <nav className="flex-1 p-4 space-y-2">
+          {navItems.map(item => {
+          const Icon = item.icon;
+          const isActive = location.pathname === item.href || item.subItems?.some(sub => location.pathname === sub.href);
+          const isExpanded = expandedItem === item.label;
+          return <div key={item.label}>
+                <Link to={item.subItems ? "#" : item.href} onClick={item.subItems ? () => toggleExpanded(item.label) : undefined} className={cn("flex items-center px-4 py-3 rounded-lg transition-colors group", isActive ? "bg-primary/10 text-primary" : "text-gray-700 hover:bg-gray-100")}>
+                  <Icon className={cn("w-5 h-5 mr-3 transition-colors", isActive ? "text-primary" : "text-gray-400 group-hover:text-primary")} />
+                  <span className="font-medium">{item.label}</span>
+                </Link>
+                {item.subItems && isExpanded && <div className="ml-6 mt-2 space-y-2">
+                    {item.subItems.map(subItem => {
+                const SubIcon = subItem.icon;
+                const isSubActive = location.pathname === subItem.href;
+                return <Link key={subItem.href} to={subItem.href} className={cn("flex items-center px-4 py-2 rounded-lg transition-colors group", isSubActive ? "bg-primary/10 text-primary" : "text-gray-700 hover:bg-gray-100")}>
+                          <SubIcon className={cn("w-4 h-4 mr-3 transition-colors", isSubActive ? "text-primary" : "text-gray-400 group-hover:text-primary")} />
+                          <span className="font-medium text-sm">{subItem.label}</span>
+                        </Link>;
+              })}
+                  </div>}
+              </div>;
+        })}
+        </nav>
 
         <div className="p-4 border-t">
           <div className="flex items-center space-x-3">
