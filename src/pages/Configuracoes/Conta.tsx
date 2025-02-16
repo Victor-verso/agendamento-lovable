@@ -29,7 +29,7 @@ const Conta = () => {
         .from('profiles')
         .select('nome, avatar_url')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
       if (profile) {
         setNome(profile.nome || '');
@@ -37,6 +37,11 @@ const Conta = () => {
       }
     } catch (error) {
       console.error('Error loading profile:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar o perfil",
+        variant: "destructive",
+      });
     }
   };
 
@@ -90,6 +95,7 @@ const Conta = () => {
         description: "Suas informações foram atualizadas com sucesso.",
       });
     } catch (error) {
+      console.error('Error updating profile:', error);
       toast({
         title: "Erro",
         description: "Ocorreu um erro ao atualizar o perfil.",
