@@ -31,6 +31,8 @@ const Servicos = () => {
     image: null as File | null,
   });
 
+  const [editingService, setEditingService] = useState<Service | null>(null);
+
   useEffect(() => {
     loadServices();
   }, []);
@@ -85,14 +87,30 @@ const Servicos = () => {
         image_url: imageUrl,
       };
 
-      const { error } = await supabase.from("services").insert(serviceData);
+      if (editingService) {
+        const { error } = await supabase
+          .from("services")
+          .update(serviceData)
+          .eq('id', editingService.id);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      toast({
-        title: "Sucesso",
-        description: "Serviço criado com sucesso",
-      });
+        toast({
+          title: "Sucesso",
+          description: "Serviço atualizado com sucesso",
+        });
+        
+        setEditingService(null);
+      } else {
+        const { error } = await supabase.from("services").insert(serviceData);
+
+        if (error) throw error;
+
+        toast({
+          title: "Sucesso",
+          description: "Serviço criado com sucesso",
+        });
+      }
 
       setNewService({
         name: "",
@@ -107,11 +125,46 @@ const Servicos = () => {
     } catch (error) {
       toast({
         title: "Erro",
-        description: "Erro ao criar serviço",
+        description: editingService ? "Erro ao atualizar serviço" : "Erro ao criar serviço",
         variant: "destructive",
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleEdit = (service: Service) => {
+    setEditingService(service);
+    setNewService({
+      name: service.name,
+      description: service.description,
+      price: service.price.toString(),
+      duration: service.duration.toString(),
+      category: service.category,
+      image: null,
+    });
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Tem certeza que deseja excluir este serviço?")) return;
+
+    try {
+      const { error } = await supabase.from("services").delete().eq("id", id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso",
+        description: "Serviço excluído com sucesso",
+      });
+
+      loadServices();
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao excluir serviço",
+        variant: "destructive",
+      });
     }
   };
 
@@ -124,12 +177,14 @@ const Servicos = () => {
             <DialogTrigger asChild>
               <Button>
                 <Plus className="w-4 h-4 mr-2" />
-                Novo Serviço
+                {editingService ? "Editar Serviço" : "Novo Serviço"}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Criar Novo Serviço</DialogTitle>
+                <DialogTitle>
+                  {editingService ? "Editar Serviço" : "Criar Novo Serviço"}
+                </DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
@@ -200,7 +255,8 @@ const Servicos = () => {
                 </div>
 
                 <Button type="submit" disabled={loading}>
-                  {loading ? "Criando..." : "Criar Serviço"}
+                  {loading ? (editingService ? "Atualizando..." : "Criando...") : 
+                           (editingService ? "Atualizar Serviço" : "Criar Serviço")}
                 </Button>
               </form>
             </DialogContent>
@@ -223,10 +279,18 @@ const Servicos = () => {
                 <CardTitle className="flex justify-between items-center">
                   <span>{service.name}</span>
                   <div className="flex space-x-2">
-                    <Button variant="outline" size="icon">
+                    <Button 
+                      variant="outline" 
+                      size="icon"
+                      onClick={() => handleEdit(service)}
+                    >
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button variant="outline" size="icon">
+                    <Button 
+                      variant="outline" 
+                      size="icon"
+                      onClick={() => handleDelete(service.id)}
+                    >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
