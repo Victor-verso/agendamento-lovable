@@ -101,6 +101,7 @@ export type Database = {
           address: string
           amenities: Json
           created_at: string | null
+          description: string | null
           id: string
           name: string
           payment_methods: Json
@@ -113,6 +114,7 @@ export type Database = {
           address: string
           amenities?: Json
           created_at?: string | null
+          description?: string | null
           id?: string
           name: string
           payment_methods?: Json
@@ -125,6 +127,7 @@ export type Database = {
           address?: string
           amenities?: Json
           created_at?: string | null
+          description?: string | null
           id?: string
           name?: string
           payment_methods?: Json

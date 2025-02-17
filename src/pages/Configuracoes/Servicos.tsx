@@ -16,6 +16,13 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import type { Service } from "@/types/database";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const Servicos = () => {
   const [services, setServices] = useState<Service[]>([]);
@@ -27,7 +34,7 @@ const Servicos = () => {
     description: "",
     price: "",
     duration: "",
-    category: "cabelo" as const,
+    category: "cabelo" as "cabelo" | "barba" | "outros",
     image: null as File | null,
   });
 
@@ -117,7 +124,7 @@ const Servicos = () => {
         description: "",
         price: "",
         duration: "",
-        category: "cabelo" as const,
+        category: "cabelo",
         image: null,
       });
 
@@ -237,6 +244,25 @@ const Servicos = () => {
                       required
                     />
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="category">Categoria</Label>
+                  <Select
+                    value={newService.category}
+                    onValueChange={(value: "cabelo" | "barba" | "outros") =>
+                      setNewService({ ...newService, category: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione a categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="cabelo">Cabelo</SelectItem>
+                      <SelectItem value="barba">Barba</SelectItem>
+                      <SelectItem value="outros">Outros</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
