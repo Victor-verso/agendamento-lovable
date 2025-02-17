@@ -1,5 +1,5 @@
 
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
@@ -22,11 +22,39 @@ import Servicos from "@/pages/Configuracoes/Servicos";
 
 // Cliente
 import ClienteLayout from "@/components/ClienteLayout";
+import ClienteLogin from "@/pages/cliente/auth/ClienteLogin";
+import ClienteRegister from "@/pages/cliente/auth/ClienteRegister";
 import AgendarServico from "@/pages/cliente/AgendarServico";
 import MeusAgendamentos from "@/pages/cliente/MeusAgendamentos";
 import PerfilCliente from "@/pages/cliente/PerfilCliente";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const App = () => {
+  const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Check for initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (loading) {
+    return null; // or a loading spinner
+  }
+
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <Router>
@@ -36,8 +64,15 @@ const App = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/recuperar-senha" element={<RecuperarSenha />} />
           
-          {/* Rotas do Cliente */}
-          <Route path="/cliente" element={<ClienteLayout />}>
+          {/* Client Auth Routes */}
+          <Route path="/cliente/auth/login" element={<ClienteLogin />} />
+          <Route path="/cliente/auth/registrar" element={<ClienteRegister />} />
+          
+          {/* Protected Client Routes */}
+          <Route 
+            path="/cliente" 
+            element={session ? <ClienteLayout /> : <Navigate to="/cliente/auth/login" />}
+          >
             <Route path="agendar" element={<AgendarServico />} />
             <Route path="agendamentos" element={<MeusAgendamentos />} />
             <Route path="perfil" element={<PerfilCliente />} />
